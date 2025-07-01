@@ -71,8 +71,8 @@ export default async function ArticlePage({ params }: Props) {
   //    Exclude the current article itself from the related list
   const relatedArticles = filterArticles({
     articles: Array.isArray(allArticles.data) ? allArticles.data : [],
-    selectedCategory: article.category.name, // Filter by the current article's category
-  }).filter((a) => a.id !== article.id) // Exclude the current article
+  })
+    .filter((a) => a.id !== article.id) // Exclude the current article
     .slice(0, 3); // Limit to, say, 3 related articles
 
     return (
