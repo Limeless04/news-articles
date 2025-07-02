@@ -2,6 +2,8 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/Navbar";
+import { LineSpinner } from "ldrs/react";
+import "ldrs/react/LineSpinner.css";
 
 export default function ProfilePage() {
   const { user, isLoading } = useAuth();
@@ -11,7 +13,9 @@ export default function ProfilePage() {
       <>
         <Navbar />
         <main className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-background">
-          <p className="text-gray-600 dark:text-muted-foreground">Loading...</p>
+          <div className="flex items-center justify-center min-h-screen w-full">
+            <LineSpinner size="40" stroke="3" speed="1" />
+          </div>
         </main>
       </>
     );
