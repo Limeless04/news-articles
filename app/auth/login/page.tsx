@@ -29,6 +29,7 @@ type LoginData = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const [isRedirecting, setIsredirecting] = useState(false);
   const router = useRouter();
 
   const form = useForm<LoginData>({
@@ -44,6 +45,7 @@ export default function LoginPage() {
     try {
       await login(data.username, data.password);
       toast.success("Login successful");
+      setIsredirecting(true);
       setTimeout(() => {
         router.push("/");
       }, 1000);
@@ -126,8 +128,17 @@ export default function LoginPage() {
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Logging in..." : "Login"}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading || isRedirecting}
+          >
+            {isRedirecting
+              ? "Redirecting..." // Display when redirecting
+              : isLoading
+              ? "Logging in..." // Display when actively logging in
+              : "Login"}{" "}
+            {/* Default text */}
           </Button>
           <div className="flex justify-between text-sm text-muted-foreground mt-4">
             <Link href="/" className="hover:underline flex items-center gap-1">
