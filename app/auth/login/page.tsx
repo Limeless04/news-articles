@@ -48,7 +48,25 @@ export default function LoginPage() {
         router.push("/admin");
       }, 1000);
     } catch (error: any) {
-      toast.error(error.message || "Something went wrong");
+      let message = "Invalid credentials";
+
+      // Detect 401 and customize message
+      if (error?.response?.status === 401) {
+        message = "User is not registered or credentials are incorrect";
+      } else if (error?.response?.data?.message) {
+        message = error.response.data.message;
+      } else if (error?.message) {
+        message = error.message;
+      }
+
+      // Show toast
+      toast.error(message);
+
+      // Show error in form
+      form.setError("root", {
+        type: "manual",
+        message,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -57,8 +75,25 @@ export default function LoginPage() {
   return (
     <div className="max-w-md mx-auto mt-10 rounded-xl bg-background">
       <h1 className="text-2xl font-semibold text-center mb-6">Login</h1>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {form.formState.errors.root && (
+            <p
+              className="
+              text-sm text-center
+              bg-red-100 dark:bg-red-900   // Light red for light mode, dark red for dark mode
+              text-red-700 dark:text-red-200 // Darker text for light mode, lighter for dark mode
+              border border-red-400 dark:border-red-700 // Border matches or complements
+              rounded-md px-4 py-2 mb-4
+              shadow-md
+              flex items-center justify-center
+              space-x-2
+            "
+            >
+              {form.formState.errors.root.message}
+            </p>
+          )}
           <FormField
             control={form.control}
             name="username"
