@@ -66,7 +66,7 @@ You can easily deploy this project on [Vercel](https://vercel.com/) or any platf
 
 ## Live preview
 
-You can check the live previe of this website at [ArticleCMS](https://cms.bitecode.my.id)
+You can check the live preview of this website at [ArticleCMS](https://cms.bitecode.my.id)
 
 ## Learn More
 
