@@ -1,7 +1,11 @@
-// src/hooks/useCategories.ts
-
-import { useState, useEffect, useCallback } from 'react';
-import { fetchAllCategories, Category, filterCategoriesBySearch, getPaginatedCategories } from '@/lib/categoryHelper'; // Import types and service
+import { useState, useEffect, useCallback } from "react";
+import {
+  fetchAllCategories,
+  Category,
+  filterCategoriesBySearch,
+  getPaginatedCategories,
+} from "@/lib/categoryHelper";
+import { fetchWithFallback } from "@/lib/fetchFallback";
 
 interface UseCategoriesOptions {
   page?: number;
@@ -24,17 +28,16 @@ const DEFAULT_LIMIT = 10;
 export default function useCategories({
   page = 1,
   limit = DEFAULT_LIMIT,
-  search = ""
+  search = "",
 }: UseCategoriesOptions = {}): UseCategoriesResult {
- const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [totalCategories, setTotalCategories] = useState<number>(0);
   const [currentPageState, setCurrentPageState] = useState<number>(page);
   const [totalPagesState, setTotalPagesState] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-
-   const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
 

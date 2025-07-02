@@ -1,4 +1,5 @@
 import axiosInstance from "./axios";
+import { fetchWithFallback } from "@/lib/fetchFallback";
 
 export interface Category {
   id: string;
@@ -15,6 +16,8 @@ export interface CategoriesApiResponse {
   totalPages: number;
 }
 
+const FALLBACK_CATEGORIES_URL = "/data/categories.json";
+
 /**
  * Fetches all categories from the API.
  * This is an internal helper now.
@@ -22,17 +25,16 @@ export interface CategoriesApiResponse {
  * It extracts the 'data' array from the full API response.
  * @throws An error if the API call fails.
  */
-export async function fetchAllCategories(): Promise<Category[]> { // This function should still return Category[]
-  try {
-    // axiosInstance.get will return AxiosResponse<CategoriesApiResponse>
-    const response = await axiosInstance.get<CategoriesApiResponse>("/categories");
-    return response.data.data; // <-- CORRECT: Access response.data (the full API response) then .data (the array of categories)
-  } catch (error) {
-    console.error("Failed to fetch raw categories:", error);
-    throw new Error("Unable to retrieve categories from the API.");
-  }
+export async function fetchAllCategories(): Promise<Category[]> {
+  // This function should still return Category[]
+  return await fetchWithFallback<Category[]>(
+    () =>
+      axiosInstance
+        .get<CategoriesApiResponse>("/categories")
+        .then((res) => res.data.data),
+    FALLBACK_CATEGORIES_URL
+  );
 }
-
 
 /**
  * Filters categories by name or presence of articles.
@@ -40,18 +42,17 @@ export async function fetchAllCategories(): Promise<Category[]> { // This functi
  * @param search - The search keyword.
  * @returns A filtered array of categories.
  */
-export function filterCategoriesBySearch(categories: Category[], search: string): Category[] {
+export function filterCategoriesBySearch(
+  categories: Category[],
+  search: string
+): Category[] {
   if (!search.trim()) return categories;
 
   const keyword = search.trim().toLowerCase();
-
-  return categories.filter(category => {
-    const nameMatches = category.name.toLowerCase().includes(keyword);
-    // const hasArticles = (category.articles?.length ?? 0) > 0;
-    return nameMatches;
-  });
+  return categories.filter((category) =>
+    category.name.toLowerCase().includes(keyword)
+  );
 }
-
 
 /**
  * Fetches unique category names from the API, including an "all" option.
@@ -60,41 +61,30 @@ export function filterCategoriesBySearch(categories: Category[], search: string)
  */
 export async function getUniqueCategories(): Promise<string[]> {
   try {
-    // `categories` here is already `Category[]` because `fetchAllCategories` returns `Promise<Category[]>`
     const categories = await fetchAllCategories();
-
-    // CORRECT: Directly map over the `categories` array (which is `Category[]`)
-    const categoryNames = Array.from(new Set(categories.map((cat) => cat.name)));
+    const categoryNames = Array.from(
+      new Set(categories.map((cat) => cat.name))
+    );
     return ["all", ...categoryNames.sort((a, b) => a.localeCompare(b))];
   } catch (error) {
-    console.error("Error generating unique categories:", error);
-    throw error;
+    console.error("Error getting unique categories:", error);
+    return ["all"];
   }
 }
 
-
 export async function getPaginatedCategories(
   page: number = 1,
-  limit: number = 10,
+  limit: number = 10
 ): Promise<CategoriesApiResponse> {
-  try {
-    // Construct query parameters
-    const params = new URLSearchParams();
-    params.append("page", page.toString());
-    params.append("limit", limit.toString());
-
-    const response = await axiosInstance.get<CategoriesApiResponse>(`/categories?${params.toString()}`);
-    return response.data; // Return the full response object
-  } catch (error) {
-    console.error("Failed to fetch paginated categories:", error);
-    // Return a default empty response on error
-    return {
-      data: [],
-      totalData: 0,
-      currentPage: page,
-      totalPages: 1,
-    };
-  }
+  return await fetchWithFallback<CategoriesApiResponse>(() => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    return axiosInstance
+      .get<CategoriesApiResponse>(`/categories?${params}`)
+      .then((res) => res.data);
+  }, FALLBACK_CATEGORIES_URL);
 }
 
 // Optional: Function to delete a category (implement actual API call)

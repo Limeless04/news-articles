@@ -1,7 +1,7 @@
 // hooks/useArticles.ts
 import { useState, useEffect, useCallback } from 'react';
 import axiosInstance from '@/lib/axios';
-import { isAxiosError } from 'axios';
+import { fetchWithFallback } from "@/lib/fetchFallback";
 
 // Types
 interface Category {
@@ -15,7 +15,7 @@ interface Category {
 interface User {
   id: string;
   username: string;
-  role: 'User' | 'Admin';
+  role: "User" | "Admin";
 }
 
 export interface Article {
@@ -43,7 +43,7 @@ interface UseArticlesParams {
   page?: number;
   limit?: number;
   category?: string;
-    search?: string;
+  search?: string;
 }
 
 interface UseArticlesResult {
@@ -58,8 +58,8 @@ interface UseArticlesResult {
 const useArticles = ({
   page = 1,
   limit = 10,
-  category = '',
-   search = '',
+  category = "",
+  search = "",
 }: UseArticlesParams = {}): UseArticlesResult => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [totalArticles, setTotalArticles] = useState<number>(0);
@@ -71,27 +71,36 @@ const useArticles = ({
     setError(null);
 
     try {
-      if (search.trim()) {
-        // Fetch all articles for local filtering
-        const allRes = await axiosInstance.get<ArticlesApiResponse>(
-          `/articles?page=1&limit=1000`
-        );
-        let filtered = allRes.data.data;
+      const shouldUseLocalFiltering =
+        search.trim() !== "" || (category && category !== "all");
 
-        // Filter by category if needed
-        if (category && category !== 'all') {
+      if (shouldUseLocalFiltering) {
+        // Fetch all articles to filter locally
+        const allRes = await fetchWithFallback(
+          () =>
+            axiosInstance
+              .get<ArticlesApiResponse>("/articles")
+              .then((res) => res.data),
+          "/data/articles.json"
+        );
+        let filtered = allRes.data;
+
+        // Filter by category if specified
+        if (category && category !== "all") {
           filtered = filtered.filter(
-            (a) => a.category.name.toLowerCase() === category.toLowerCase()
+            (a) => a.category?.name?.toLowerCase() === category.toLowerCase()
           );
         }
 
-        // Filter by search query (title or content)
-        const lowerQuery = search.toLowerCase();
-        filtered = filtered.filter(
-          (a) =>
-            a.title.toLowerCase().includes(lowerQuery) ||
-            a.content.toLowerCase().includes(lowerQuery)
-        );
+        // Filter by search if specified
+        if (search.trim() !== "") {
+          const lowerQuery = search.toLowerCase();
+          filtered = filtered.filter(
+            (a) =>
+              a.title.toLowerCase().includes(lowerQuery) ||
+              a.content.toLowerCase().includes(lowerQuery)
+          );
+        }
 
         const start = (page - 1) * limit;
         const paginated = filtered.slice(start, start + limit);
@@ -103,10 +112,11 @@ const useArticles = ({
         const params = new URLSearchParams({
           page: page.toString(),
           limit: limit.toString(),
-          ...(category && category !== 'all' && { category }),
         });
 
-        const res = await axiosInstance.get<ArticlesApiResponse>(`/articles?${params.toString()}`);
+        const res = await axiosInstance.get<ArticlesApiResponse>(
+          `/articles?${params.toString()}`
+        );
 
         setArticles(res.data.data);
         setTotalArticles(res.data.total);
@@ -117,7 +127,7 @@ const useArticles = ({
     } finally {
       setLoading(false);
     }
-  }, [page, limit,  category, search]);
+  }, [page, limit, category, search]);
 
   useEffect(() => {
     fetchArticles();
@@ -128,7 +138,7 @@ const useArticles = ({
     totalArticles,
     loading,
     error,
-    refetch: fetchArticles
+    refetch: fetchArticles,
   };
 };
 

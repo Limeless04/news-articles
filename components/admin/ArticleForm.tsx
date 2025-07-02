@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useCategories from "@/hooks/useCategories";
+import ArticlePreview from "./ArticlePreview";
 
 const articleSchema = z.object({
   title: z.string().min(3),
@@ -31,7 +32,7 @@ const articleSchema = z.object({
   categoryId: z.string().uuid(),
 });
 
-type ArticleFormValues = z.infer<typeof articleSchema>;
+export type ArticleFormValues = z.infer<typeof articleSchema>;
 
 interface ArticleFormProps {
   mode?: "create" | "edit";
@@ -48,6 +49,10 @@ export default function ArticleForm({
 }: ArticleFormProps) {
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+
+  const [previewData, setPreviewData] = useState<ArticleFormValues | null>(
+    null
+  );
 
   const {
     categories,
@@ -82,13 +87,19 @@ export default function ArticleForm({
   }, [mode, articleId, form]);
 
   const onSubmit = async (data: ArticleFormValues) => {
+    setPreviewData(data);
+  };
+
+  const handleConfirmSubmit = async () => {
+    if (!previewData) return;
+
     try {
       setLoading(true);
 
       if (mode === "edit" && articleId) {
-        await axiosInstance.patch(`/articles/${articleId}`, data);
+        await axiosInstance.patch(`/articles/${articleId}`, previewData);
       } else {
-        await axiosInstance.post("/articles", data);
+        await axiosInstance.post("/articles", previewData);
       }
 
       form.reset();
@@ -98,6 +109,7 @@ export default function ArticleForm({
       setFetchError("Submit failed. Please try again.");
     } finally {
       setLoading(false);
+      setPreviewData(null);
     }
   };
 
@@ -113,9 +125,20 @@ export default function ArticleForm({
     );
   }
 
+  if (previewData) {
+    return (
+      <ArticlePreview
+        data={previewData}
+        categories={categories}
+        loading={loading}
+        onConfirm={handleConfirmSubmit}
+        onCancel={() => setPreviewData(null)}
+      />
+    );
+  }
+
   return (
     <Form {...form}>
-     
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full">
         {/* Title */}
         <FormField

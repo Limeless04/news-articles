@@ -1,0 +1,30 @@
+{
+    "data": 
+    [
+  {
+    "id": "1",
+    "title": "Fallback Article",
+    "content": "<p>This is a fallback article.</p>",
+    "categoryId": "cat-1",
+    "createdAt": "2024-01-01",
+    "updatedAt": "2024-01-01",
+    "userId": "user-1",
+    "category": {
+      "id": "cat-1",
+      "name": "General",
+      "userId": "user-1",
+      "createdAt": "2024-01-01",
+      "updatedAt": "2024-01-01"
+    },
+    "user": {
+      "id": "user-1",
+      "username": "fallbackuser",
+      "role": "User"
+    }
+  }
+],
+"total": 1,
+"page": 1,
+"limit": 9
+}
+
