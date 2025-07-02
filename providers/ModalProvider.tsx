@@ -1,7 +1,7 @@
 // context/ModalContext.tsx
 import { createContext, useContext, useState, ReactNode } from "react";
 
-type ModalType = "create-category" | "edit-category" | "delete-category" | null;
+type ModalType = "create-category" | "edit-category" | "delete" | null;
 
 interface ModalContextType {
   openModal: (type: ModalType, props?: any) => void;

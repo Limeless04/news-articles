@@ -64,21 +64,8 @@ export default function CategoryTable() {
     openModal("edit-category", { id: id });
   };
 
-  const handleDeleteCategory = async (id: string) => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete this category? This action cannot be undone."
-      )
-    ) {
-      try {
-        await deleteCategory(id);
-        refetch(); // Re-fetch categories to update the table
-        alert("Category deleted successfully!");
-      } catch (err) {
-        console.error("Error deleting category:", err);
-        alert("Failed to delete category.");
-      }
-    }
+  const handleDeleteCategory = async (id: string, name: string) => {
+    openModal("delete", { id: id, name: name, type: "category" });
   };
 
   // --- Render Loading, Error, or Data ---
@@ -207,7 +194,9 @@ export default function CategoryTable() {
                         <Pencil className="w-4 h-4" />
                       </Button>
                       <Button
-                        onClick={() => handleDeleteCategory(category.id)}
+                        onClick={() =>
+                          handleDeleteCategory(category.id, category.name)
+                        }
                         variant="destructive"
                         size="sm"
                       >

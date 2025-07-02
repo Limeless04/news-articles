@@ -16,6 +16,7 @@ import ArticleTableLoading from "./loading/ArticleTableLoading";
 import { getUniqueCategories } from "@/lib/categoryHelper";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
+import { useModal } from "@/providers/ModalProvider";
 
 const ARTICLES_PER_PAGE = 10;
 
@@ -24,6 +25,8 @@ export default function ArticleTable() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>("");
+
+  const { openModal } = useModal();
 
   const router = useRouter();
 
@@ -79,8 +82,8 @@ export default function ArticleTable() {
     router.push(`/admin/articles/${id}/edit`);
   };
 
-  const handleDeleteArticle = (id: string) => {
-    console.log("delete articles");
+  const handleDeleteArticle = (id: string, name: string) => {
+    openModal("delete", { id: id, name: name, type: "article" });
   };
 
   if (loading || categoriesLoading) {
@@ -262,7 +265,9 @@ export default function ArticleTable() {
                           <Pencil className="w-4 h-4" />
                         </Button>
                         <Button
-                          onClick={() => handleDeleteArticle(article.id)}
+                          onClick={() =>
+                            handleDeleteArticle(article.id, article.title)
+                          }
                           variant="destructive"
                           size="sm"
                           className="bg-red-500 hover:bg-red-600 text-white"

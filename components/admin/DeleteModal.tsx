@@ -5,26 +5,30 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+type DeleteType = "category" | "article";
 
 interface DeleteCategoryModalProps {
-  categoryName: string;
+  type: DeleteType;
+  name: string;
   onDelete: () => void;
   onCancel: () => void;
 }
 
 export default function DeleteCategoryModal({
-  categoryName,
+  type,
+  name,
   onDelete,
   onCancel,
 }: DeleteCategoryModalProps) {
+   const label = type === "category" ? "Category" : "Article";
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Delete Category</DialogTitle>
+        <DialogTitle>Delete {label}</DialogTitle>
         <DialogDescription>
           Are you sure you want to delete{" "}
-          <strong className="text-red-600">{categoryName}</strong>? This action
-          cannot be undone.
+          <strong className="text-red-600">{name}</strong>? This action cannot
+          be undone.
         </DialogDescription>
       </DialogHeader>
 
