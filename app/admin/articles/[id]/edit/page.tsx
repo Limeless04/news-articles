@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axiosInstance from "@/lib/axios";
+import { toast } from "sonner";
 
 export default function EditArticlePage() {
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function EditArticlePage() {
         mode="edit"
         articleId={articleId}
         onSuccess={() => {
+          toast.success("Successfully saved!");
           router.push("/admin");
         }}
       />

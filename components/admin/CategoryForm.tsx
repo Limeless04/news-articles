@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
 import useCategories from "@/hooks/useCategories";
 import { Skeleton } from "../ui/skeleton";
 import { createCategory, updateCategory } from "@/lib/categoryService";
-
+import { toast } from "sonner";
 
 const categorySchema = z.object({
   name: z.string().min(2, "Category name must be at least 2 characters"),
@@ -32,8 +32,8 @@ type CategoryFormData = z.infer<typeof categorySchema>;
 interface CategoryFormProps {
   mode?: "create" | "edit";
   categoryId?: {
-    id: string
-  }; 
+    id: string;
+  };
   onSuccess?: () => void;
 }
 
@@ -47,11 +47,7 @@ export default function CategoryForm({
     defaultValues: { name: "" },
   });
 
-   const {
-    categories,
-    loading: categoriesLoading,
-    error,
-  } = useCategories();
+  const { categories, loading: categoriesLoading, error } = useCategories();
 
   // Populate form if in edit mode
   useEffect(() => {
@@ -63,20 +59,20 @@ export default function CategoryForm({
     }
   }, [mode, categoryId, categories, form]);
 
-
-
-
   const onSubmit = async (data: CategoryFormData) => {
     try {
       if (mode === "create") {
-        await createCategory(data); 
+        await createCategory(data);
+        toast.success("Category created successfully");
       } else if (mode === "edit" && categoryId) {
         await updateCategory(categoryId.id, data);
+        toast.success("Category updated successfully");
       }
       form.reset();
       onSuccess?.();
     } catch (err) {
       console.error("Failed to submit category form:", err);
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
@@ -88,13 +84,16 @@ export default function CategoryForm({
         </DialogTitle>
       </DialogHeader>
 
-       {categoriesLoading ? (
+      {categoriesLoading ? (
         <Skeleton className="h-24 w-full" />
       ) : error ? (
         <p className="text-sm text-red-500">Failed to load category data.</p>
       ) : (
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 pt-2"
+          >
             <FormField
               control={form.control}
               name="name"

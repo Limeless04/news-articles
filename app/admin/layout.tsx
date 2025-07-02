@@ -6,8 +6,9 @@ import { ReactNode,  useState } from "react";
 import {Menu} from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { ModalProvider } from "@/providers/ModalProvider";
-import CategoryModal from "@/components/admin/CategoryModal";
 import { ProtectedAdmin } from "@/components/admin/ProtectedWrapper";
+import AdminModal from "@/components/admin/AdminModal";
+import { Toaster } from "sonner";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // mobile toggle
@@ -43,21 +44,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             />
           </div>
 
-          {/* Collapse Button (Desktop Only) */}
-          {/* <div className="hidden md:flex flex-col items-center justify-start pt-4 bg-white dark:bg-gray-800">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleCollapse}
-              className="text-muted-foreground"
-            >
-              {isSidebarCollapsed ? <ChevronsRight /> : <ChevronsLeft />}
-            </Button>
-          </div> */}
-
           <main className="flex-1 overflow-y-auto p-6">{children}</main>
 
-          <CategoryModal />
+          <AdminModal />
+          <Toaster richColors position="top-right" />
         </ModalProvider>
       </ProtectedAdmin>
     </div>

@@ -3,6 +3,7 @@
 import ArticleForm from "@/components/admin/ArticleForm";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function CreateArticlePage() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function CreateArticlePage() {
       <ArticleForm
         mode="create"
         onSuccess={() => {
+          toast.success("Successfully saved!");
           router.push("/admin");
         }}
       />

@@ -17,16 +17,19 @@ import { useTheme } from "next-themes";
 import { ThemeSwithcer } from "./ThemeSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   const isOnProfile = pathname === "/profile";
   const handleLogout = () => {
     logout();
+    router.push("/");
   };
 
   return (
@@ -107,22 +110,63 @@ function Navbar() {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden px-4 pb-4 space-y-2">
-          <Link href="/profile">
-            <Button variant="ghost" className="w-full justify-start">
-              <User className="w-4 h-4 mr-2" />
-              Profile
+          {user && (
+            <>
+              {user.role === "Admin" && (
+                <Link href="/admin" onClick={() => setIsOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start">
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </Link>
+              )}
+            </>
+          )}
+
+          {isOnProfile ? (
+            <Link href="/" onClick={() => setIsOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <Home className="w-4 h-4 mr-2" />
+                Home
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/profile" onClick={() => setIsOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <User className="w-4 h-4 mr-2" />
+                Profile
+              </Button>
+            </Link>
+          )}
+
+          {user ? (
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-red-500 hover:text-red-600"
+              onClick={() => {
+                handleLogout();
+                setIsOpen(false);
+              }}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
             </Button>
-          </Link>
-          <Link href="/auth/login">
-            <Button className="w-full justify-start">
-              <LogIn className="w-4 h-4 mr-2" />
-              Login
-            </Button>
-          </Link>
+          ) : (
+            <Link href="/auth/login" onClick={() => setIsOpen(false)}>
+              <Button className="w-full justify-start">
+                <LogIn className="w-4 h-4 mr-2" />
+                Login
+              </Button>
+            </Link>
+          )}
+
           <Button
             variant="ghost"
             className="w-full justify-start"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            onClick={() => {
+              setTheme(theme === "dark" ? "light" : "dark");
+              setIsOpen(false);
+            }}
           >
             {theme === "dark" ? (
               <>

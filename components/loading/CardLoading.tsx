@@ -9,7 +9,7 @@ import {
 
 export default function CardLoading() {
   return (
-      <Card className="flex flex-col overflow-hidden shadow-md hover:shadow-lg transition-shadow w-[400px] h-full animate-pulse">
+    <Card className="flex flex-col overflow-hidden shadow-md hover:shadow-lg transition-shadow w-[200px] md:w-[400px] h-full animate-pulse">
       {/* Image Placeholder */}
       <div className=" w-full h-50 px-10 bg-gray-300 dark:bg-gray-700 " />
 

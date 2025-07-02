@@ -4,30 +4,37 @@ import { useModal } from "@/providers/ModalProvider";
 import CategoryForm from "./CategoryForm";
 import DeleteModal from "./DeleteModal";
 import { deleteCategory } from "@/lib/categoryHelper";
+import { toast } from "sonner";
+import { deleteArticle } from "@/lib/articleHelper";
 
-export default function CategoryModal() {
+export default function AdminModal() {
   const { modalType, closeModal, modalProps } = useModal();
 
   if (!modalType) return null;
 
   const handleDelete = async () => {
     try {
-      if (!modalProps?.id) {
-        throw new Error("Missing category ID.");
+      if (!modalProps?.id || !modalProps?.type) {
+        throw new Error("Missing ID or type.");
       }
 
-      await deleteCategory(modalProps.id);
-      console.log("Category deleted.");
-
-      // Optionally refetch or update your UI here
-      // refetchCategories?.();
+      if (modalProps.type === "category") {
+        await deleteCategory(modalProps.id);
+        toast.success("Category deleted successfully");
+      } else if (modalProps.type === "article") {
+        await deleteArticle(modalProps.id);
+        toast.success("Article deleted successfully");
+      }
 
       closeModal();
     } catch (error) {
       console.error("Delete failed:", error);
-      alert("Failed to delete category. Please try again.");
+      toast.error(
+        `Failed to delete ${modalProps?.type || "item"}. Please try again.`
+      );
     }
   };
+
   return (
     <Dialog open={!!modalType} onOpenChange={closeModal}>
       {modalType === "create-category" && (

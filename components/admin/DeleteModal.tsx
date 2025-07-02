@@ -7,20 +7,20 @@ import {
 import { Button } from "@/components/ui/button";
 type DeleteType = "category" | "article";
 
-interface DeleteCategoryModalProps {
+interface DeleteModalProps {
   type: DeleteType;
   name: string;
   onDelete: () => void;
   onCancel: () => void;
 }
 
-export default function DeleteCategoryModal({
+export default function DeleteModal({
   type,
   name,
   onDelete,
   onCancel,
-}: DeleteCategoryModalProps) {
-   const label = type === "category" ? "Category" : "Article";
+}: DeleteModalProps) {
+  const label = type === "category" ? "Category" : "Article";
   return (
     <DialogContent>
       <DialogHeader>

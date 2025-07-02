@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-
+import Link from "next/link";
 
 export default function HeroSection() {
   return (
@@ -24,7 +24,9 @@ export default function HeroSection() {
         <p className="text-lg md:text-xl mb-6">
           Stay informed with the latest updates and trends in technology.
         </p>
-        <Button>Get Started</Button>
+        <Link href="/auth/login">
+          <Button>Get Started</Button>
+        </Link>
       </div>
     </section>
   );
