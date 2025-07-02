@@ -45,7 +45,7 @@ export default function LoginPage() {
       await login(data.username, data.password);
       toast.success("Login successful");
       setTimeout(() => {
-        router.push("/admin");
+        router.push("/");
       }, 1000);
     } catch (error: any) {
       let message = "Invalid credentials";

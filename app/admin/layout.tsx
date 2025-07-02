@@ -6,7 +6,7 @@ import { ReactNode,  useState } from "react";
 import {Menu} from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { ModalProvider } from "@/providers/ModalProvider";
-import { ProtectedAdmin } from "@/components/admin/ProtectedWrapper";
+import { ProtectedRoute } from "@/components/ProtectedWrapper";
 import AdminModal from "@/components/admin/AdminModal";
 import { Toaster } from "sonner";
 
@@ -19,7 +19,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const toggleCollapse = () => setIsSidebarCollapsed(!isSidebarCollapsed);
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden">
-      <ProtectedAdmin>
+      <ProtectedRoute>
         <ModalProvider>
           {/* Mobile Toggle */}
           <div className="md:hidden flex justify-between items-center px-4 py-2 bg-white dark:bg-gray-800 shadow-md">
@@ -49,7 +49,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <AdminModal />
           <Toaster richColors position="top-right" />
         </ModalProvider>
-      </ProtectedAdmin>
+      </ProtectedRoute>
     </div>
   );
 }

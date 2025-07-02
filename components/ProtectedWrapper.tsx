@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { LineSpinner } from "ldrs/react";
 import "ldrs/react/LineSpinner.css";
 
-export function ProtectedAdmin({ children }: { children: React.ReactNode }) {
+export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 

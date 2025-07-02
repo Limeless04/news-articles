@@ -29,7 +29,7 @@ function Navbar() {
   const isOnProfile = pathname === "/profile";
   const handleLogout = () => {
     logout();
-    router.push("/");
+    router.push("/auth/login");
   };
 
   return (
