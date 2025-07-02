@@ -22,6 +22,7 @@ import useCategories from "@/hooks/useCategories";
 import { Skeleton } from "../ui/skeleton";
 import { createCategory, updateCategory } from "@/lib/categoryService";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const categorySchema = z.object({
   name: z.string().min(2, "Category name must be at least 2 characters"),
@@ -49,10 +50,13 @@ export default function CategoryForm({
 
   const { categories, loading: categoriesLoading, error } = useCategories();
 
+  const router = useRouter();
+
   // Populate form if in edit mode
   useEffect(() => {
     if (mode === "edit" && categoryId && categories.length > 0) {
       const matched = categories.find((cat) => cat.id === categoryId.id);
+      console.log(matched);
       if (matched) {
         form.reset({ name: matched.name });
       }

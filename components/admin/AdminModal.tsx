@@ -3,12 +3,14 @@ import { Dialog } from "@/components/ui/dialog";
 import { useModal } from "@/providers/ModalProvider";
 import CategoryForm from "./CategoryForm";
 import DeleteModal from "./DeleteModal";
-import { deleteCategory } from "@/lib/categoryHelper";
+import { deleteCategory } from "@/lib/categoryService";
 import { toast } from "sonner";
 import { deleteArticle } from "@/lib/articleHelper";
+import { useRouter } from "next/navigation";
 
 export default function AdminModal() {
   const { modalType, closeModal, modalProps } = useModal();
+  const router = useRouter();
 
   if (!modalType) return null;
 
@@ -25,7 +27,7 @@ export default function AdminModal() {
         await deleteArticle(modalProps.id);
         toast.success("Article deleted successfully");
       }
-
+      router.refresh();
       closeModal();
     } catch (error) {
       console.error("Delete failed:", error);
@@ -38,14 +40,21 @@ export default function AdminModal() {
   return (
     <Dialog open={!!modalType} onOpenChange={closeModal}>
       {modalType === "create-category" && (
-        <CategoryForm mode="create" onSuccess={closeModal} />
+        <CategoryForm
+          mode="create"
+          onSuccess={() => {
+            closeModal();
+          }}
+        />
       )}
 
       {modalType === "edit-category" && (
         <CategoryForm
           mode="edit"
           categoryId={modalProps || { name: "Old Category" }}
-          onSuccess={closeModal}
+          onSuccess={() => {
+            closeModal();
+          }}
         />
       )}
 

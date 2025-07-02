@@ -4,8 +4,7 @@ import {
   Category,
   filterCategoriesBySearch,
   getPaginatedCategories,
-} from "@/lib/categoryHelper";
-import { fetchWithFallback } from "@/lib/fetchFallback";
+} from "@/lib/categoryHelper"; // Import types and service
 
 interface UseCategoriesOptions {
   page?: number;

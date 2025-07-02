@@ -3,6 +3,8 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { LineSpinner } from "ldrs/react";
+import "ldrs/react/LineSpinner.css";
 
 export function ProtectedAdmin({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -20,8 +22,8 @@ export function ProtectedAdmin({ children }: { children: React.ReactNode }) {
 
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600 dark:text-muted-foreground">Loading...</p>
+      <div className="flex items-center justify-center min-h-screen w-full">
+        <LineSpinner size="40" stroke="3" speed="1" />
       </div>
     );
   }

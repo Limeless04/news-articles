@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import Pagination from "@/components/Pagination"; // Adjust path if necessary
 import useCategories from "@/hooks/useCategories"; // The new hook for categories
 import CategoryTableLoading from "./loading/CategoryTableLoading";
-import { deleteCategory } from "@/lib/categoryHelper";
+import { deleteCategory } from "@/lib/categoryService";
 import { useModal } from "@/providers/ModalProvider";
 
 const CATEGORIES_PER_PAGE = 10; // Adjust as needed
@@ -61,6 +61,7 @@ export default function CategoryTable() {
   };
 
   const handleEditCategory = (id: string) => {
+    console.log("Category ID: ", id);
     openModal("edit-category", { id: id });
   };
 
@@ -164,48 +165,58 @@ export default function CategoryTable() {
                 </td>
               </tr>
             ) : (
-              categories.map((category) => (
-                <tr key={category.id} className="border-t dark:border-gray-700">
-                  <td className="px-4 py-2 text-gray-900 dark:text-white">
-                    {category.id}
-                  </td>
-                  <td className="px-4 py-2 text-gray-900 dark:text-white">
-                    {category.name}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">
-                    {category.createdAt
-                      ? new Date(category.createdAt).toLocaleDateString(
-                          "id-ID",
-                          {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
+              categories
+                .slice() // create a shallow copy so you don't mutate the original array
+                .sort(
+                  (a, b) =>
+                    new Date(b.createdAt ?? 0).getTime() -
+                    new Date(a.createdAt ?? 0).getTime()
+                )
+                .map((category) => (
+                  <tr
+                    key={category.id}
+                    className="border-t dark:border-gray-700"
+                  >
+                    <td className="px-4 py-2 text-gray-900 dark:text-white">
+                      {category.id}
+                    </td>
+                    <td className="px-4 py-2 text-gray-900 dark:text-white">
+                      {category.name}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">
+                      {category.createdAt
+                        ? new Date(category.createdAt).toLocaleDateString(
+                            "id-ID",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )
+                        : "N/A"}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
+                        <Button
+                          onClick={() => handleEditCategory(category.id)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            handleDeleteCategory(category.id, category.name)
                           }
-                        )
-                      : "N/A"}
-                  </td>
-                  <td className="px-4 py-2 text-right">
-                    <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
-                      <Button
-                        onClick={() => handleEditCategory(category.id)}
-                        variant="outline"
-                        size="sm"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        onClick={() =>
-                          handleDeleteCategory(category.id, category.name)
-                        }
-                        variant="destructive"
-                        size="sm"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                          variant="destructive"
+                          size="sm"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
             )}
           </tbody>
         </table>
