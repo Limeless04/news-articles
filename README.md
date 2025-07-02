@@ -9,6 +9,28 @@ This is a simple Content Management System (CMS) for managing articles, built wi
 - Manage categories for organizing articles
 - User authentication for admin access
 - Responsive design for desktop and mobile
+- Server-side pagination for articles and categories
+- Client-side search and filtering for articles and categories
+- Optimistic UI updates and automatic cache revalidation using SWR
+- Fallback to local JSON data if the API is unavailable
+- TypeScript for type safety across the project
+- Modular architecture with reusable hooks and components
+- Role-based access control (Admin/User)
+- Easy deployment to Vercel or any Next.js-compatible platform
+
+## Libraries Used
+
+This project leverages several modern libraries and tools to provide a robust, scalable, and maintainable CMS:
+
+- **[Next.js](https://nextjs.org/):** The React framework for production, enabling server-side rendering, routing, and API routes.
+- **[React](https://react.dev/):** The core UI library for building interactive user interfaces.
+- **[TypeScript](https://www.typescriptlang.org/):** Adds static typing to JavaScript, improving code quality and maintainability.
+- **[SWR](https://swr.vercel.app/):** A React Hooks library for remote data fetching, caching, and revalidation, enabling optimistic UI updates and automatic cache management.
+- **[Axios](https://axios-http.com/):** Promise-based HTTP client for making API requests.
+- **[Next-Themes](https://github.com/pacocoursey/next-themes):** For easy integrated theming in nextjs.
+- **Other Utilities:** Custom hooks, helpers, and fallback logic for robust data handling and UI state.
+
+These libraries work together to deliver a seamless, performant, and developer-friendly CMS experience.
 
 ## Getting Started
 
@@ -27,16 +49,24 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Project Structure
 
-- `app/` - Main application pages and layouts
-- `components/` - Reusable UI components (e.g., article tables, grids)
-- `lib/` - Utility libraries and helpers
-- `hooks/` - Custom React hooks
-- `providers/` - Context providers for state management
-- `public/` - Static assets (images, icons, etc.)
+- `app/` - Main application pages and layouts. Handles routing and page-level logic.
+- `components/` - Reusable UI components such as article tables, forms, modals, and grids.
+- `lib/` - Utility libraries and helpers, including API helpers, category/article utilities, and fallback logic.
+- `hooks/` - Custom React hooks for data fetching and state management (e.g., `useArticles`, `useCategories`).
+- `providers/` - Context providers for global state management (such as authentication or theme).
+- `public/` - Static assets (images, icons, etc.) served directly by Next.js.
+- `data/` - Static JSON files used as fallback data when the API is unavailable (e.g., `articles.json`, `categories.json`).
+- `styles/` - Global and component-level CSS or SCSS files for styling the application.
+- `utils/` - General utility functions for formatting, validation, and other helpers.
+- `types/` - TypeScript type definitions and interfaces shared across the project.
 
 ## Deployment
 
 You can easily deploy this project on [Vercel](https://vercel.com/) or any platform that supports Next.js.
+
+## Live preview
+
+You can check the live previe of this website at [ArticleCMS](https://cms.bitecode.my.id)
 
 ## Learn More
 
