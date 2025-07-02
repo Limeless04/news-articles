@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Plus, RefreshCw, Search } from "lucide-react";
-import { articles } from "@/lib/dummyData";
 import {
   Select,
   SelectContent,
@@ -14,19 +13,19 @@ import {
 import Pagination from "./Pagination";
 import useArticles from "@/hooks/useArticles";
 import ArticleTableLoading from "./loading/ArticleTableLoading";
-import { filterArticles } from "@/lib/articleHelper";
 import { getUniqueCategories } from "@/lib/categoryHelper";
 import { Input } from "./ui/input";
-import type { Article } from "@/hooks/useArticles";
-import { de } from "zod/v4/locales";
+import { useRouter } from "next/navigation";
 
-const ARTICLES_PER_PAGE = 9;
+const ARTICLES_PER_PAGE = 10;
 
 export default function ArticleTable() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>("");
+
+  const router = useRouter();
 
   // State for fetched unique category names (from categoryService)
   const [uniqueCategoryNames, setUniqueCategoryNames] = useState<string[]>([]);
@@ -63,7 +62,6 @@ export default function ArticleTable() {
     fetchAndSetCategories();
   }, []); // Empty dependency array means this runs once on mount
 
-
   // --- Reset Pagination when Filters Change ---
   useEffect(() => {
     setCurrentPage(1);
@@ -74,15 +72,15 @@ export default function ArticleTable() {
   }, [selectedCategory]);
 
   const handleAddArticle = () => {
-    console.log("Add new article clicked");
+    router.push("/admin/articles/create");
   };
 
   const handleEditArticle = (id: string) => {
-    console.log(`Edit article with ID: ${id}`);
+    router.push(`/admin/articles/${id}/edit`);
   };
 
   const handleDeleteArticle = (id: string) => {
-    console.log(`Delete article with ID: ${id}`);
+    console.log("delete articles");
   };
 
   if (loading || categoriesLoading) {
@@ -180,7 +178,7 @@ export default function ArticleTable() {
 
           <Button
             onClick={handleAddArticle}
-            className="flex items-center gap-2 w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            className="flex items-center gap-2 w-full sm:w-auto"
           >
             <Plus className="w-4 h-4" />
             Add Article

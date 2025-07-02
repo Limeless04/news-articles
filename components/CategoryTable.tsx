@@ -8,6 +8,7 @@ import Pagination from "@/components/Pagination"; // Adjust path if necessary
 import useCategories from "@/hooks/useCategories"; // The new hook for categories
 import CategoryTableLoading from "./loading/CategoryTableLoading";
 import { deleteCategory } from "@/lib/categoryHelper";
+import { useModal } from "@/providers/ModalProvider";
 
 const CATEGORIES_PER_PAGE = 10; // Adjust as needed
 
@@ -15,6 +16,7 @@ export default function CategoryTable() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>("");
+  const { openModal } = useModal();
 
   // Debounce search query to avoid too many API calls
   useEffect(() => {
@@ -55,13 +57,11 @@ export default function CategoryTable() {
   ); // totalPages is a dependency for this useCallback
 
   const handleAddCategory = () => {
-    console.log("Add new category clicked");
-    // Implement navigation or modal for adding category
+    openModal("create-category");
   };
 
   const handleEditCategory = (id: string) => {
-    console.log(`Edit category with ID: ${id}`);
-    // Implement navigation to edit page/modal
+    openModal("edit-category", { id: id });
   };
 
   const handleDeleteCategory = async (id: string) => {

@@ -74,7 +74,7 @@ const useArticles = ({
       if (search.trim()) {
         // Fetch all articles for local filtering
         const allRes = await axiosInstance.get<ArticlesApiResponse>(
-          `/articles?page=1&limit=10000`
+          `/articles?page=1&limit=1000`
         );
         let filtered = allRes.data.data;
 
