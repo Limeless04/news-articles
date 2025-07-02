@@ -7,10 +7,12 @@ import { deleteCategory } from "@/lib/categoryService";
 import { toast } from "sonner";
 import { deleteArticle } from "@/lib/articleHelper";
 import useCategories from "@/hooks/useCategories";
+import useArticles from "@/hooks/useArticles";
 
 export default function AdminModal() {
   const { modalType, closeModal, modalProps } = useModal();
   const { refetch } = useCategories();
+  const { refetch: refetchArticles } = useArticles();
 
   if (!modalType) return null;
 
@@ -23,11 +25,12 @@ export default function AdminModal() {
       if (modalProps.type === "category") {
         await deleteCategory(modalProps.id);
         toast.success("Category deleted successfully");
+        refetch();
       } else if (modalProps.type === "article") {
         await deleteArticle(modalProps.id);
         toast.success("Article deleted successfully");
+        refetchArticles();
       }
-      refetch();
       closeModal();
     } catch (error) {
       console.error("Delete failed:", error);
