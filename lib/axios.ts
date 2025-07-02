@@ -8,4 +8,15 @@ const axiosInstance = axios.create({
   },
 });
 
+// Add Authorization header automatically if token exists
+axiosInstance.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
 export default axiosInstance;

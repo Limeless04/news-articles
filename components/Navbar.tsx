@@ -2,14 +2,32 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Menu, Home, User, LogIn, Sun, Moon } from "lucide-react";
+import {
+  Menu,
+  Home,
+  User,
+  LogIn,
+  LogOut,
+  Sun,
+  Moon,
+  LayoutDashboard,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { ThemeSwithcer } from "./ThemeSwitcher";
+import { useAuth } from "@/hooks/useAuth";
+import { usePathname } from "next/navigation";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { theme, setTheme } = useTheme();
+  const pathname = usePathname();
+  const { user, logout } = useAuth();
+
+  const isOnProfile = pathname === "/profile";
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <nav className="bg-[var(--background)] text-[var(--foreground)] shadow-sm sticky top-0 z-50">
@@ -25,18 +43,53 @@ function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link href="/profile">
-            <Button variant="ghost" className="flex items-center gap-1">
-              <User className="w-4 h-4" />
-              Profile
+          {user && (
+            <>
+              {user.role === "Admin" && (
+                <Link href="/admin">
+                  <Button variant="ghost" className="flex items-center gap-1">
+                    <LayoutDashboard className="w-4 h-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+              )}
+            </>
+          )}
+
+          {isOnProfile ? (
+            <>
+              <Link href="/">
+                <Button variant="ghost" className="flex items-center gap-1">
+                  <Home className="w-4 h-4" />
+                  Home
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/profile">
+                <Button variant="ghost" className="flex items-center gap-1">
+                  <User className="w-4 h-4" />
+                  Profile
+                </Button>
+              </Link>
+            </>
+          )}
+
+          {user ? (
+            <Button onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-1" />
+              Logout
             </Button>
-          </Link>
-          <Link href="/login">
-            <Button>
-              <LogIn className="w-4 h-4 mr-1" />
-              Login
-            </Button>
-          </Link>
+          ) : (
+            <Link href="/auth/login">
+              <Button>
+                <LogIn className="w-4 h-4 mr-1" />
+                Login
+              </Button>
+            </Link>
+          )}
+
           <ThemeSwithcer />
         </div>
 
@@ -60,7 +113,7 @@ function Navbar() {
               Profile
             </Button>
           </Link>
-          <Link href="/auth">
+          <Link href="/auth/login">
             <Button className="w-full justify-start">
               <LogIn className="w-4 h-4 mr-2" />
               Login
