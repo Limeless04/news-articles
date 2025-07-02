@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axiosInstance from '@/lib/axios';
 import { fetchWithFallback } from "@/lib/fetchFallback";
+import useSWR from "swr";
 
 // Types
 interface Category {
@@ -54,6 +55,29 @@ interface UseArticlesResult {
   refetch: () => void;
 }
 
+const FALLBACK_ARTICLES_URL = "/data/articles.json";
+
+// Fetch all articles (for client-side filtering)
+const fetchAllArticles = async () =>
+  fetchWithFallback<ArticlesApiResponse>(
+    () =>
+      axiosInstance
+        .get<ArticlesApiResponse>("/articles")
+        .then((res) => res.data),
+    FALLBACK_ARTICLES_URL
+  );
+
+// Fetch paginated articles (server-side)
+const fetchPaginatedArticles = async (page: number, limit: number) => {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+  return axiosInstance
+    .get<ArticlesApiResponse>(`/articles?${params.toString()}`)
+    .then((res) => res.data);
+};
+
 // Hook
 const useArticles = ({
   page = 1,
@@ -61,84 +85,68 @@ const useArticles = ({
   category = "",
   search = "",
 }: UseArticlesParams = {}): UseArticlesResult => {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [totalArticles, setTotalArticles] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+  const shouldUseLocalFiltering =
+    search.trim() !== "" || (category && category !== "all");
 
-  const fetchArticles = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  // SWR for all articles (for client-side filtering)
+  const {
+    data: allData,
+    error: allError,
+    isLoading: allLoading,
+    mutate: mutateAll,
+  } = useSWR(shouldUseLocalFiltering ? "all-articles" : null, fetchAllArticles);
 
-    try {
-      const shouldUseLocalFiltering =
-        search.trim() !== "" || (category && category !== "all");
+  // SWR for paginated articles (server-side)
+  const {
+    data: paginatedData,
+    error: paginatedError,
+    isLoading: paginatedLoading,
+    mutate: mutatePaginated,
+  } = useSWR(
+    !shouldUseLocalFiltering ? ["paginated-articles", page, limit] : null,
+    () => fetchPaginatedArticles(page, limit)
+  );
 
-      if (shouldUseLocalFiltering) {
-        // Fetch all articles to filter locally
-        const allRes = await fetchWithFallback(
-          () =>
-            axiosInstance
-              .get<ArticlesApiResponse>("/articles")
-              .then((res) => res.data),
-          "/data/articles.json"
-        );
-        let filtered = allRes.data;
+  let articles: Article[] = [];
+  let totalArticles = 0;
+  let loading = false;
+  let error: Error | null = null;
 
-        // Filter by category if specified
-        if (category && category !== "all") {
-          filtered = filtered.filter(
-            (a) => a.category?.name?.toLowerCase() === category.toLowerCase()
-          );
-        }
-
-        // Filter by search if specified
-        if (search.trim() !== "") {
-          const lowerQuery = search.toLowerCase();
-          filtered = filtered.filter(
-            (a) =>
-              a.title.toLowerCase().includes(lowerQuery) ||
-              a.content.toLowerCase().includes(lowerQuery)
-          );
-        }
-
-        const start = (page - 1) * limit;
-        const paginated = filtered.slice(start, start + limit);
-
-        setArticles(paginated);
-        setTotalArticles(filtered.length);
-      } else {
-        // Server-side pagination
-        const params = new URLSearchParams({
-          page: page.toString(),
-          limit: limit.toString(),
-        });
-
-        const res = await axiosInstance.get<ArticlesApiResponse>(
-          `/articles?${params.toString()}`
-        );
-
-        setArticles(res.data.data);
-        setTotalArticles(res.data.total);
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err as Error);
-    } finally {
-      setLoading(false);
+  if (shouldUseLocalFiltering) {
+    loading = allLoading;
+    error = allError as Error | null;
+    let filtered = allData?.data ?? [];
+    if (category && category !== "all") {
+      filtered = filtered.filter(
+        (a) => a.category?.name?.toLowerCase() === category.toLowerCase()
+      );
     }
-  }, [page, limit, category, search]);
-
-  useEffect(() => {
-    fetchArticles();
-  }, [fetchArticles]);
+    if (search.trim() !== "") {
+      const lowerQuery = search.toLowerCase();
+      filtered = filtered.filter(
+        (a) =>
+          a.title.toLowerCase().includes(lowerQuery) ||
+          a.content.toLowerCase().includes(lowerQuery)
+      );
+    }
+    totalArticles = filtered.length;
+    const start = (page - 1) * limit;
+    articles = filtered.slice(start, start + limit);
+  } else {
+    loading = paginatedLoading;
+    error = paginatedError as Error | null;
+    articles = paginatedData?.data ?? [];
+    totalArticles = paginatedData?.total ?? 0;
+  }
 
   return {
     articles,
     totalArticles,
     loading,
     error,
-    refetch: fetchArticles,
+    refetch: shouldUseLocalFiltering
+      ? () => mutateAll()
+      : () => mutatePaginated(),
   };
 };
 

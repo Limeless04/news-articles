@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+// src/hooks/useCategories.ts
 import {
   fetchAllCategories,
   Category,
   filterCategoriesBySearch,
   getPaginatedCategories,
-} from "@/lib/categoryHelper"; // Import types and service
+} from "@/lib/categoryHelper";
+import useSWR, { mutate as globalMutate } from "swr";
 
 interface UseCategoriesOptions {
   page?: number;
@@ -24,64 +25,41 @@ interface UseCategoriesResult {
 
 const DEFAULT_LIMIT = 10;
 
+const fetcher = async (page: number, limit: number, search: string) => {
+  if (search.trim()) {
+    const all = await fetchAllCategories();
+    const filtered = filterCategoriesBySearch(all, search);
+    const total = filtered.length;
+    const start = (page - 1) * limit;
+    const paginated = filtered.slice(start, start + limit);
+    return {
+      data: paginated,
+      totalData: total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+    };
+  } else {
+    return await getPaginatedCategories(page, limit);
+  }
+};
+
 export default function useCategories({
   page = 1,
   limit = DEFAULT_LIMIT,
   search = "",
 }: UseCategoriesOptions = {}): UseCategoriesResult {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [totalCategories, setTotalCategories] = useState<number>(0);
-  const [currentPageState, setCurrentPageState] = useState<number>(page);
-  const [totalPagesState, setTotalPagesState] = useState<number>(1);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      if (search.trim()) {
-        // Client-side search
-        const all = await fetchAllCategories();
-        const filtered = filterCategoriesBySearch(all, search);
-        const total = filtered.length;
-        const start = (page - 1) * limit;
-        const paginated = filtered.slice(start, start + limit);
-
-        setCategories(paginated);
-        setTotalCategories(total);
-        setCurrentPageState(page);
-        setTotalPagesState(Math.ceil(total / limit));
-      } else {
-        // Normal server-side pagination
-        const response = await getPaginatedCategories(page, limit);
-        setCategories(response.data);
-        setTotalCategories(response.totalData);
-        setCurrentPageState(response.currentPage);
-        setTotalPagesState(response.totalPages);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("An error occurred"));
-    } finally {
-      setLoading(false);
-    }
-  }, [page, limit, search]);
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const refetch = useCallback(() => {
-    fetchData();
-  }, [fetchData]);
+  const key = ["categories", page, limit, search];
+  const { data, error, isLoading, mutate } = useSWR(key, () =>
+    fetcher(page, limit, search)
+  );
 
   return {
-    categories,
-    totalCategories,
-    currentPage: currentPageState,
-    totalPages: totalPagesState,
-    loading,
+    categories: data?.data ?? [],
+    totalCategories: data?.totalData ?? 0,
+    currentPage: data?.currentPage ?? page,
+    totalPages: data?.totalPages ?? 1,
+    loading: isLoading,
     error,
-    refetch,
+    refetch: () => mutate(),
   };
 }

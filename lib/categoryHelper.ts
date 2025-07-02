@@ -36,23 +36,25 @@ export async function fetchAllCategories(): Promise<Category[]> {
   );
 }
 
+
 /**
  * Filters categories by name or presence of articles.
  * @param categories - The full list of categories to filter.
  * @param search - The search keyword.
  * @returns A filtered array of categories.
  */
-export function filterCategoriesBySearch(
-  categories: Category[],
-  search: string
-): Category[] {
+export function filterCategoriesBySearch(categories: Category[], search: string): Category[] {
   if (!search.trim()) return categories;
 
   const keyword = search.trim().toLowerCase();
-  return categories.filter((category) =>
-    category.name.toLowerCase().includes(keyword)
-  );
+
+  return categories.filter(category => {
+    const nameMatches = category.name.toLowerCase().includes(keyword);
+    // const hasArticles = (category.articles?.length ?? 0) > 0;
+    return nameMatches;
+  });
 }
+
 
 /**
  * Fetches unique category names from the API, including an "all" option.
@@ -61,30 +63,41 @@ export function filterCategoriesBySearch(
  */
 export async function getUniqueCategories(): Promise<string[]> {
   try {
+    // `categories` here is already `Category[]` because `fetchAllCategories` returns `Promise<Category[]>`
     const categories = await fetchAllCategories();
-    const categoryNames = Array.from(
-      new Set(categories.map((cat) => cat.name))
-    );
+
+    // CORRECT: Directly map over the `categories` array (which is `Category[]`)
+    const categoryNames = Array.from(new Set(categories.map((cat) => cat.name)));
     return ["all", ...categoryNames.sort((a, b) => a.localeCompare(b))];
   } catch (error) {
-    console.error("Error getting unique categories:", error);
-    return ["all"];
+    console.error("Error generating unique categories:", error);
+    throw error;
   }
 }
 
+
 export async function getPaginatedCategories(
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<CategoriesApiResponse> {
-  return await fetchWithFallback<CategoriesApiResponse>(() => {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-    });
-    return axiosInstance
-      .get<CategoriesApiResponse>(`/categories?${params}`)
-      .then((res) => res.data);
-  }, FALLBACK_CATEGORIES_URL);
+  try {
+    // Construct query parameters
+    const params = new URLSearchParams();
+    params.append("page", page.toString());
+    params.append("limit", limit.toString());
+
+    const response = await axiosInstance.get<CategoriesApiResponse>(`/categories?${params.toString()}`);
+    return response.data; // Return the full response object
+  } catch (error) {
+    console.error("Failed to fetch paginated categories:", error);
+    // Return a default empty response on error
+    return {
+      data: [],
+      totalData: 0,
+      currentPage: page,
+      totalPages: 1,
+    };
+  }
 }
 
 // Optional: Function to delete a category (implement actual API call)

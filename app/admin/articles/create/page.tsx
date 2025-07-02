@@ -4,9 +4,11 @@ import ArticleForm from "@/components/admin/ArticleForm";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import useArticles from "@/hooks/useArticles";
 
 export default function CreateArticlePage() {
   const router = useRouter();
+  const { refetch } = useArticles();
 
   return (
     <div className="w-full p-6 bg-white dark:bg-gray-900 rounded-md shadow">
@@ -23,6 +25,7 @@ export default function CreateArticlePage() {
       <ArticleForm
         mode="create"
         onSuccess={() => {
+          refetch();
           toast.success("Successfully saved!");
           router.push("/admin");
         }}

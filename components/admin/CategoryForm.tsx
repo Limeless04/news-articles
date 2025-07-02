@@ -50,8 +50,6 @@ export default function CategoryForm({
 
   const { categories, loading: categoriesLoading, error } = useCategories();
 
-  const router = useRouter();
-
   // Populate form if in edit mode
   useEffect(() => {
     if (mode === "edit" && categoryId && categories.length > 0) {

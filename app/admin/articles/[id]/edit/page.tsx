@@ -7,11 +7,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
+import useArticles from "@/hooks/useArticles";
 
 export default function EditArticlePage() {
   const router = useRouter();
   const params = useParams();
   const articleId = params?.id as string;
+  const { refetch } = useArticles();
 
   return (
     <div className="w-full p-6 bg-white dark:bg-gray-900 rounded-md shadow">
@@ -29,6 +31,7 @@ export default function EditArticlePage() {
         mode="edit"
         articleId={articleId}
         onSuccess={() => {
+          refetch();
           toast.success("Successfully saved!");
           router.push("/admin");
         }}

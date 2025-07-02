@@ -31,7 +31,6 @@ export default function CategoryTable() {
     };
   }, [searchQuery]);
 
-  // Use the useCategories hook, passing the local currentPage and debouncedSearchQuery
   const {
     categories,
     totalCategories,
@@ -44,17 +43,6 @@ export default function CategoryTable() {
     limit: CATEGORIES_PER_PAGE,
     search: debouncedSearchQuery, // THIS IS CORRECT
   });
-
-  // No need for a separate useEffect to sync currentPage, handlePageChange directly updates it
-  const handlePageChange = useCallback(
-    (page: number) => {
-      // Only update if the page is valid
-      if (page >= 1 && page <= totalPages) {
-        setCurrentPage(page);
-      }
-    },
-    [totalPages]
-  ); // totalPages is a dependency for this useCallback
 
   const handleAddCategory = () => {
     openModal("create-category");

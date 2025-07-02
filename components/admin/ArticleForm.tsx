@@ -95,13 +95,13 @@ export default function ArticleForm({
 
     try {
       setLoading(true);
-
+    
       if (mode === "edit" && articleId) {
-        await axiosInstance.patch(`/articles/${articleId}`, previewData);
+        console.log(previewData);
+        await axiosInstance.put(`/articles/${articleId}`, previewData);
       } else {
         await axiosInstance.post("/articles", previewData);
       }
-
       form.reset();
       onSuccess?.();
     } catch (err) {

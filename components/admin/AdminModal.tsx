@@ -6,11 +6,11 @@ import DeleteModal from "./DeleteModal";
 import { deleteCategory } from "@/lib/categoryService";
 import { toast } from "sonner";
 import { deleteArticle } from "@/lib/articleHelper";
-import { useRouter } from "next/navigation";
+import useCategories from "@/hooks/useCategories";
 
 export default function AdminModal() {
   const { modalType, closeModal, modalProps } = useModal();
-  const router = useRouter();
+  const { refetch } = useCategories();
 
   if (!modalType) return null;
 
@@ -27,7 +27,7 @@ export default function AdminModal() {
         await deleteArticle(modalProps.id);
         toast.success("Article deleted successfully");
       }
-      router.refresh();
+      refetch();
       closeModal();
     } catch (error) {
       console.error("Delete failed:", error);
@@ -43,6 +43,7 @@ export default function AdminModal() {
         <CategoryForm
           mode="create"
           onSuccess={() => {
+            refetch();
             closeModal();
           }}
         />
@@ -53,6 +54,7 @@ export default function AdminModal() {
           mode="edit"
           categoryId={modalProps || { name: "Old Category" }}
           onSuccess={() => {
+            refetch();
             closeModal();
           }}
         />
